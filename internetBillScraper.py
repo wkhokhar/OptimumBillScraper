@@ -3,6 +3,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+import requests
 
 #open json file
 with open('props.json') as f:
@@ -25,5 +26,49 @@ idField.send_keys(optimumID)
 passwordField.send_keys(password)
 passwordField.send_keys(Keys.RETURN)
 
-time.sleep(15)
+time.sleep(5)
+driver.get("https://www.optimum.net/pay-bill/account-activity")
+
+time.sleep(5)
+
+#get browser info and cookies
+cookies = driver.get_cookies()
+cookies_dict = {cookie['name']: cookie['value'] for cookie in cookies}
+user_agent = driver.execute_script("return navigator.userAgent;")
+
+
+# Prepare headers
+headers = {
+    'User-Agent': user_agent,
+    'Accept': 'application/json, text/plain, */*',
+    'Accept-Encoding': 'gzip, deflate, br, zstd',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Connection': 'keep-alive',
+    'Referer': 'https://www.optimum.net/pay-bill/account-activity/',
+    'X-Requested-With': 'XMLHttpRequest'
+}
+
+# Include the XSRF token in headers if present in cookies
+for cookie in cookies:
+    if cookie['name'] == 'XSRF-TOKEN':
+        headers['X-XSRF-TOKEN'] = cookie['value']
+        break
+
+#get url response
+url = 'https://www.optimum.net/api/billpay/services/v1/billpay/summary?system=Portal'
+response = requests.get(url, headers=headers, cookies=cookies_dict)
+
+# Check if the request was successful
+if response.status_code == 200:
+    billing_data = response.json()
+    
+    # Save the billing data to a JSON file
+    with open('billing_data.json', 'w') as json_file:
+        json.dump(billing_data, json_file, indent=4)
+    
+    print("Billing data saved successfully.")
+else:
+    print(f"Failed to retrieve data: {response.status_code}")
+    print(response.text)
+
 driver.quit()
