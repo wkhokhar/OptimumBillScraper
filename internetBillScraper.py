@@ -69,3 +69,12 @@ else:
     print(response.text)
 
 driver.quit()
+
+#print bill amounts in order of oldest to most recent.
+with open("billing_data.json") as bd:
+    billingData = json.load(bd)
+    
+bills = []
+for bill in billingData["getBillSummaryReturn"]["billStatements"]:
+    bills.append(bill["billAmount"])
+print(bills)
