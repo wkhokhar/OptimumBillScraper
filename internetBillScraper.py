@@ -3,6 +3,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service
 import requests
 
 #open json file
@@ -11,6 +12,15 @@ with open('props.json') as f:
 
 #configure webdriver
 driver = webdriver.Chrome()
+
+#configure webdriver for RASBERRY_PI os only:
+#sudo apt install chromium-browser chromium-chromedriver python3-venv
+#need to run venv and install selenium
+'''
+service = Service('/usr/bin/chromedriver')
+driver = webdriver.Chrome(service=service)
+'''
+
 driver.get("https://www.optimum.net/pay-bill/account-activity")
 
 #get credentials from props file
